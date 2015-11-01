@@ -1,7 +1,8 @@
 import time
 import json
-from urllib import urlencode
-from urllib2 import Request, urlopen, URLError, HTTPError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 
 
 class ScrobbleException(Exception):
@@ -38,23 +39,23 @@ class ScrobbleServer(object):
             try:
                 req = Request(self.submit_url, urlencode(data))
                 response = urlopen(req)
-            except (URLError, HTTPError), e:
+            except (URLError, HTTPError) as e:
                 last_error = str(e)
-                print('Scrobbling error: %s, will retry in %ss' % (last_error, timeout))
+                print(('Scrobbling error: %s, will retry in %ss' % (last_error, timeout)))
             else:
                 jsonresponse = json.load(response)
 
-                if jsonresponse.has_key('scrobbles'): # we're just checking if key exists
+                if 'scrobbles' in jsonresponse: # we're just checking if key exists
                     if self.debug:
                         for v in jsonresponse['scrobbles']['scrobble']:
                             self.log.write(str(v)+"\n")
                     break
-                elif jsonresponse.has_key('error'):
+                elif 'error' in jsonresponse:
                     last_error = 'Bad server response: %s' % jsonresponse['error']
-                    print('%s, will retry in %ss' % (last_error, timeout))
+                    print(('%s, will retry in %ss' % (last_error, timeout)))
                 else:
                     last_error = 'Bad server response: %s' % response.read()
-                    print('%s, will retry in %ss' % (last_error, timeout))
+                    print(('%s, will retry in %ss' % (last_error, timeout)))
             time.sleep(timeout)
         else:
             raise ScrobbleException('Cannot scrobble after multiple retries. Last error: %s' % last_error)

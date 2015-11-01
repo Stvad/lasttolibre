@@ -20,7 +20,7 @@ Usage: libreimport2.py username --type=scrobbles --file=myscrobbles.txt [--serve
 
 '''
 
-import json, sys, urllib, urllib2, hashlib, getpass, time
+import json, sys, urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse, hashlib, getpass, time
 from scrobble2 import ScrobbleServer, ScrobbleTrack
 import argparse
 
@@ -58,8 +58,8 @@ class Importer(object):
             format='json',
             api_key=self.api_key
         )
-        req = self.server + '/2.0/?' + urllib.urlencode(getdata)
-        response = urllib2.urlopen(req)
+        req = self.server + '/2.0/?' + urllib.parse.urlencode(getdata)
+        response = urllib.request.urlopen(req)
         try:
             jsonresponse = json.load(response)
             self.session_key = jsonresponse['session']['key']
@@ -89,8 +89,8 @@ class Importer(object):
             api_key=self.api_key
         )
 
-        req = urllib2.Request(self.server + '/2.0/', urllib.urlencode(postdata))
-        response = urllib2.urlopen(req)
+        req = urllib.request.Request(self.server + '/2.0/', urllib.parse.urlencode(postdata))
+        response = urllib.request.urlopen(req)
         
         try:
             jsonresponse = json.load(response)
@@ -116,7 +116,7 @@ class Importer(object):
                 timestamp, track, artist, album, trackmbid, artistmbid, albummbid = line.strip("\n").split("\t")
                 #submission protocol doesnt specify artist/album mbid, so we dont send them
                 self.scrobbler.add_track(ScrobbleTrack(timestamp, track, artist, album, trackmbid))
-                print("%d: Adding to post %s playing %s" % (n, artist, track))
+                print(("%d: Adding to post %s playing %s" % (n, artist, track)))
             self.scrobbler.submit()
     
         else:
@@ -125,9 +125,9 @@ class Importer(object):
                 n += 1
                 timestamp, track, artist, album, trackmbid, artistmbid, albummbid = line.strip("\n").split("\t")
                 if self.submit(artist, track):
-                    print("%d: %s %s - %s" % (n, self.datatype, artist, track))
+                    print(("%d: %s %s - %s" % (n, self.datatype, artist, track)))
                 else:
-                    print("FAILED: %s - %s" % (artist, track))
+                    print(("FAILED: %s - %s" % (artist, track)))
                 time.sleep(1)
  
 if __name__ == '__main__':
