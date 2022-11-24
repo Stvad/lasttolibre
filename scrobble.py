@@ -34,15 +34,15 @@ class ScrobbleServer(object):
 
     def _handshake(self):
         timestamp = int(time.time())
-        token = (md5hash(md5hash(self.password).hexdigest()
-                    + str(timestamp)).hexdigest())
+        token = (md5hash(md5hash(self.password.encode('utf-8')).hexdigest().encode('utf-8')
+                    + str(timestamp).encode('utf-8')).hexdigest())
         auth_url = "%s/?hs=true&p=1.2&u=%s&t=%d&a=%s&c=%s" % (self.name,
                                                               self.username,
                                                               timestamp,
                                                               token,
                                                               self.client_code)
         response = urlopen(auth_url).read()
-        lines = response.split("\n")
+        lines = response.decode('utf-8').split("\n")
         if lines[0] != "OK":
             raise ScrobbleException("Server returned: %s" % (response,))
         self.session_id = lines[1]
