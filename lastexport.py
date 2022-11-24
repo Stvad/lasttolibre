@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
 # This program is free software: you can redistribute it and/or modify
@@ -49,7 +49,7 @@ def get_options(parser):
         infotype = "bannedtracks"
     else:
         infotype = "recenttracks"
-         
+
     return options.username, options.outfile, options.startpage, options.server, infotype
 
 def connect_server(server, username, startpage, sleep_func=time.sleep, tracktype='recenttracks'):
@@ -108,12 +108,12 @@ def get_pageinfo(response, tracktype='recenttracks'):
 def get_tracklist(response):
     """Read XML page and get a list of tracks and their info."""
     xmlpage = ET.fromstring(response)
-    tracklist = xmlpage.getiterator('track')
+    tracklist = xmlpage.iter('track')
     return tracklist
 
 def parse_track(trackelement):
     """Extract info from every track entry and output to list."""
-    if trackelement.find('artist').getchildren():
+    if trackelement.find('artist'):
         #artist info is nested in loved/banned tracks xml
         artistname = trackelement.find('artist').find('name').text
         artistmbid = trackelement.find('artist').find('mbid').text
@@ -161,7 +161,7 @@ def get_tracks(server, username, startpage=1, sleep_func=time.sleep, tracktype='
             response =  connect_server(server, username, page, sleep_func, tracktype)
 
         tracklist = get_tracklist(response)
-		
+
         tracks = []
         for trackelement in tracklist:
             # do not export the currently playing track.

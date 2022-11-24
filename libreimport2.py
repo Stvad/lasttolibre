@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,8 +49,8 @@ class Importer(object):
 
 
     def auth(self):
-        passmd5 = hashlib.md5(self.password).hexdigest()
-        token = hashlib.md5(self.username+passmd5).hexdigest()
+        passmd5 = hashlib.md5(self.password.encode('utf-8')).hexdigest()
+        token = hashlib.md5(self.username.encode('utf-8')+passmd5.encode('utf-8')).hexdigest()
         getdata = dict(
             method='auth.getMobileSession',
             username=self.username,
@@ -66,9 +66,9 @@ class Importer(object):
         except:
             print(jsonresponse)
             sys.exit(1)
-    
+
     def submit(self, trackartist, tracktitle):
-    
+
         if self.datatype == 'loved':
             libremethod = 'track.love'
         elif self.datatype == 'unloved':
@@ -91,11 +91,11 @@ class Importer(object):
 
         req = urllib.request.Request(self.server + '/2.0/', urllib.parse.urlencode(postdata))
         response = urllib.request.urlopen(req)
-        
+
         try:
             jsonresponse = json.load(response)
             status = jsonresponse['lfm']['status']
-    
+
             if status == "ok":
                 return True
         except:
@@ -105,11 +105,11 @@ class Importer(object):
         self.parse_args()
         self.password = getpass.getpass()
         self.auth()
-    
+
         if self.datatype == 'scrobbles':
             self.scrobbler = ScrobbleServer(self.server, self.session_key, api_key=self.api_key,
                                             debug=self.debug, username=self.username)
-    
+
             n = 0
             for line in file(self.infile):
                 n = n + 1
@@ -118,7 +118,7 @@ class Importer(object):
                 self.scrobbler.add_track(ScrobbleTrack(timestamp, track, artist, album, trackmbid))
                 print(("%d: Adding to post %s playing %s" % (n, artist, track)))
             self.scrobbler.submit()
-    
+
         else:
             n = 0
             for line in file(self.infile):
@@ -129,7 +129,7 @@ class Importer(object):
                 else:
                     print(("FAILED: %s - %s" % (artist, track)))
                 time.sleep(1)
- 
+
 if __name__ == '__main__':
     app = Importer()
     app.run()
